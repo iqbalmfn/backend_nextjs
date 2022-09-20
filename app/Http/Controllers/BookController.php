@@ -36,7 +36,7 @@ class BookController extends Controller
 
   public function show(Book $book)
   {
-    //
+    return $this->sendResponse($book, "Successfully get book");
   }
 
   public function edit(Book $book)
@@ -46,11 +46,25 @@ class BookController extends Controller
 
   public function update(Request $request, Book $book)
   {
-    //
+    $validator = Validator::make($request->all(), [
+      "name"  => "required|min:4",
+      "description" => "required|min:10|max:300",
+      "price" => "required"
+    ]);
+
+    if ($validator->fails()) {
+      return $this->sendError("Validation error", $validator->errors());
+    }
+
+    $book->update($request->all());
+
+    return $this->sendResponse($book, "Book has been updated");
   }
 
   public function destroy(Book $book)
   {
-    //
+    $book->delete(); 
+
+    return $this->sendResponse($book, "Book has been deleted");
   }
 }
