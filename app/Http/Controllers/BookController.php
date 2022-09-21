@@ -9,62 +9,61 @@ use Illuminate\Support\Facades\Validator;
 
 class BookController extends Controller
 {
-  public function index()
-  {
-    $books = Book::orderByDesc('id')->get();
-    $data = BookResource::collection($books);
+    public function index()
+    {
+        $books = Book::query()
+            ->orderByDesc('id')
+            ->get();
+        $data = BookResource::collection($books);
 
-    return $this->sendResponse($data, "Successfully get books");
-  }
-
-  public function store(Request $request)
-  {
-    $validator = Validator::make($request->all(), [
-      "name"  => "required|min:4",
-      "description" => "required|min:10|max:300",
-      "price" => "required"
-    ]);
-
-    if ($validator->fails()) {
-      return $this->sendError("Validation error", $validator->errors());
+        return $this->sendResponse($data, "Successfully get books");
     }
 
-    $store = Book::create($request->all());
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "category_id"  => "required|numeric",
+            "name"  => "required|min:4",
+            "description" => "required|min:10|max:300",
+            "price" => "required"
+        ]);
 
-    return $this->sendResponse($store, "Successfully add books");
-  }
+        if ($validator->fails()) {
+            return $this->sendError("Validation error", $validator->errors());
+        }
 
-  public function show(Book $book)
-  {
-    return $this->sendResponse($book, "Successfully get book");
-  }
+        $store = Book::create($request->all());
 
-  public function edit(Book $book)
-  {
-    //
-  }
-
-  public function update(Request $request, Book $book)
-  {
-    $validator = Validator::make($request->all(), [
-      "name"  => "required|min:4",
-      "description" => "required|min:10|max:300",
-      "price" => "required"
-    ]);
-
-    if ($validator->fails()) {
-      return $this->sendError("Validation error", $validator->errors());
+        return $this->sendResponse($store, "Successfully add books");
     }
 
-    $book->update($request->all());
+    public function show(Book $book)
+    {
+        return $this->sendResponse($book, "Successfully get book");
+    }
 
-    return $this->sendResponse($book, "Book has been updated");
-  }
+    public function update(Request $request, Book $book)
+    {
+        $validator = Validator::make($request->all(), [
+            "category_id"  => "required|numeric",
+            "name"  => "required|min:4",
+            "description" => "required|min:10|max:300",
+            "price" => "required"
+        ]);
 
-  public function destroy(Book $book)
-  {
-    $book->delete(); 
+        if ($validator->fails()) {
+            return $this->sendError("Validation error", $validator->errors());
+        }
 
-    return $this->sendResponse($book, "Book has been deleted");
-  }
+        $book->update($request->all());
+
+        return $this->sendResponse($book, "Book has been updated");
+    }
+
+    public function destroy(Book $book)
+    {
+        $book->delete();
+
+        return $this->sendResponse($book, "Book has been deleted");
+    }
 }
