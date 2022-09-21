@@ -12,6 +12,7 @@ class BookController extends Controller
     public function index()
     {
         $books = Book::query()
+            ->with('category')
             ->orderByDesc('id')
             ->get();
         $data = BookResource::collection($books);
@@ -22,19 +23,26 @@ class BookController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "category_id"  => "required|numeric",
-            "name"  => "required|min:4",
+            "category_id" => "required|numeric",
+            "name"        => "required|min:4",
             "description" => "required|min:10|max:300",
-            "price" => "required"
+            "price"       => "required",
+            "image"       => "required|image|max:2048",
         ]);
 
         if ($validator->fails()) {
             return $this->sendError("Validation error", $validator->errors());
         }
 
-        $store = Book::create($request->all());
+        $uploadFile = $request->image;
+        $filename = uniqid().".".$uploadFile->getClientOriginalExtension();
+        $uploadFile->move(public_path(). '/images', $filename);
 
-        return $this->sendResponse($store, "Successfully add books");
+        $input = $request->all();
+        $input['image'] = $filename;
+        $store = Book::create($input);
+
+        return $this->sendResponse($store->load('category'), "Successfully add books");
     }
 
     public function show(Book $book)
@@ -45,10 +53,10 @@ class BookController extends Controller
     public function update(Request $request, Book $book)
     {
         $validator = Validator::make($request->all(), [
-            "category_id"  => "required|numeric",
-            "name"  => "required|min:4",
+            "category_id" => "required|numeric",
+            "name"        => "required|min:4",
             "description" => "required|min:10|max:300",
-            "price" => "required"
+            "price"       => "required"
         ]);
 
         if ($validator->fails()) {
@@ -57,7 +65,7 @@ class BookController extends Controller
 
         $book->update($request->all());
 
-        return $this->sendResponse($book, "Book has been updated");
+        return $this->sendResponse($book->load('category'), "Book has been updated");
     }
 
     public function destroy(Book $book)

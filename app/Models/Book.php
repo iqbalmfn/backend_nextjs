@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Book extends Model
 {
     use HasFactory;
-    protected $with = ['category'];
+    // protected $with = ['category'];
     protected $guarded = [];
 
     public function category() {
-        return $this->hasOne(Category::class, 'id', 'category_id');
+        return $this->belongsTo(Category::class);
     }
 }
