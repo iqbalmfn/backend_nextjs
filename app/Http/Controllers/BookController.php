@@ -9,15 +9,19 @@ use Illuminate\Support\Facades\Validator;
 
 class BookController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+
         $books = Book::query()
             ->with('category')
+            ->search($request->search)
+            ->when($request->category, fn ($q) => $q->whereCategoryId($request->category))
             ->orderByDesc('id')
-            ->get();
-        $data = BookResource::collection($books);
+            ->paginate($request->perPage);
 
-        return $this->sendResponse($data, "Successfully get books");
+        // $data = BookResource::collection($books);
+
+        return $this->sendResponse($books, "Successfully get books");
     }
 
     public function store(Request $request)
