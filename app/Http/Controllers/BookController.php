@@ -31,19 +31,20 @@ class BookController extends Controller
             "name"        => "required|min:4",
             "description" => "required|min:10|max:300",
             "price"       => "required",
-            "image"       => "required|image|max:2048",
+            "image"       => "nullable|image|max:2048",
         ]);
 
         if ($validator->fails()) {
             return $this->sendError("Validation error", $validator->errors());
         }
-
-        $uploadFile = $request->image;
-        $filename = uniqid().".".$uploadFile->getClientOriginalExtension();
-        $uploadFile->move(public_path(). '/images', $filename);
-
         $input = $request->all();
-        $input['image'] = $filename;
+
+        if ($request->image) {
+          $uploadFile = $request->image;
+          $filename = uniqid().".".$uploadFile->getClientOriginalExtension();
+          $uploadFile->move(public_path(). '/images', $filename);
+          $input['image'] = $filename;
+        }
         $store = Book::create($input);
 
         return $this->sendResponse($store->load('category'), "Successfully add books");
